@@ -31,16 +31,16 @@ char Dot = 0b10000000;
 int SimForInd[] = {0,0,0}; // characters for displaying on indicators
 
 /*
-	segments
-	B0-B2
+	Psegments
+	PB0-PB2
 	
 	buttons
-	Ñ0-Ñ2
-	C0 - start
-	C1 - stop
-	C2 - mode select
+	PC0-PC2
+	PC0 - start
+	PC1 - stop
+	PC2 - mode select
 		
-	ÐÑ4 - klaxon
+	PC4 - klaxon
 */
 Time time1 = 0; //for time calculation 
 Time time2 = 0; //for dynamic indication
@@ -210,7 +210,7 @@ void Mode_select (void)
 	}
 	SimForInd[2] =TimeToCalc/60; // min
 	SimForInd[1] =(TimeToCalc%60)/10; //0.1 min;
-	SimForInd[0] =(TimeToCalc%60)%10; // señ
+	SimForInd[0] =(TimeToCalc%60)%10; // seÃ±
 }
 
 void DinamicInd(void)
