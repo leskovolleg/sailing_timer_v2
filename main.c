@@ -58,8 +58,8 @@ uint16_t TimeToCalc = 0;
 //buzzer sound generation
 ISR( TIMER2_COMPA_vect)
 {
-	TCNT2 = 0;
-	PORTC^=(1<<PC5);
+  TCNT2 = 0;
+   PORTC^=(1<<PC5);
 }
 
 //flag for buzzer enable
@@ -79,95 +79,95 @@ uint8_t ClakLong = 0;
 
 int main(void)
 {
-    //sound pins
-	DDRC = 0b00110000;
+//sound pins
+DDRC = 0b00110000;
 	
-	//timer T2 for sound
-	TCCR2B|=(1<<CS20)|(1<<CS21);
-	OCR2A=48;
+//timer T2 for sound
+TCCR2B|=(1<<CS20)|(1<<CS21);
+OCR2A=48;
+
+//button settings C0-C3
+PORTC = 0b00000111;//pull-up enable
 	
-	//button settings C0-C3
-	PORTC = 0b00000111;//pull-up enable
+//digit pins
+DDRB = 0b0000111;
 	
-	//digit pins
-	DDRB = 0b0000111;
+//segment settings
+DDRD = 0xFF;
 	
-	//segment settings
-	DDRD = 0xFF;
-	
-	//enable global interrupt
-	sei();
-	
-	//timers init
-	Timer0_Init();
-	Timer0_StartTimer(&time2);//dynamic indication
-	Timer0_StartTimer(&ButtTime);//button delay timer
-	Timer0_StartTimer(&time3);//buzzer 
+//enable global interrupt
+sei();
+
+//timers init
+Timer0_Init();
+Timer0_StartTimer(&time2);//dynamic indication
+Timer0_StartTimer(&ButtTime);//button delay timer
+Timer0_StartTimer(&time3);//buzzer 
 
 		
-    while (1) 
-    {
-		//mode select pin PC2
-		if((~PINC & (1<<2))&&(InProgressFlag == 0))
-		{
-			if(Timer0_TimeIsOut(&ButtTime,200))
-			{
-				Mode_select();
-				Timer0_StartTimer(&ButtTime);	
-			}
-		}		
+while (1) 
+{
+//mode select pin PC2
+if((~PINC & (1<<2))&&(InProgressFlag == 0))
+  {
+	if(Timer0_TimeIsOut(&ButtTime,200))
+	{
+	Mode_select();
+	Timer0_StartTimer(&ButtTime);	
+	}
+  }		
 			
-		//start button C0
-		if((~PINC & (1<<0))&&(Mode != 0))
-		{
-			if(Timer0_TimeIsOut(&ButtTime,200))
-			{
-				if(InProgressFlag == 0)
-				{
-				StartFlag = 1;
-				Timer0_StartTimer(&ButtTime);
-				}
-				//enable klaxon
-				Timer0_StartTimer(&time4);	
-				ClaksonFlag = 1;				
-			}
-		}
+//start button C0
+if((~PINC & (1<<0))&&(Mode != 0))
+{
+  if(Timer0_TimeIsOut(&ButtTime,200))
+  {
+    if(InProgressFlag == 0)
+    {
+    StartFlag = 1;
+    Timer0_StartTimer(&ButtTime);
+    }
+  //enable klaxon
+  Timer0_StartTimer(&time4);	
+  ClaksonFlag = 1;				
+  }
+}
 		
-		//stop button
-		if(~PINC & (1<<1))
-		{
-			if(Timer0_TimeIsOut(&ButtTime,200))
-			{
-				InProgressFlag = 0;	
-				Timer0_StartTimer(&ButtTime);
-			}				
-		}
+//stop button
+if(~PINC & (1<<1))
+{
+  if(Timer0_TimeIsOut(&ButtTime,200))
+  {
+  InProgressFlag = 0;	
+  Timer0_StartTimer(&ButtTime);
+   }				
+}
 		
-		//if start button was pressed
-		if(StartFlag == 1)
-		{
-			StartFlag = 0;
-			InProgressFlag = 1;
-			Timer0_StartTimer(&time1);//start time calculation
-		}
+//if start button was pressed
+if(StartFlag == 1)
+{
+StartFlag = 0;
+InProgressFlag = 1;
+Timer0_StartTimer(&time1);//start time calculation
+}
+
+//in progress 
+if(InProgressFlag == 1)
+{			
+  if(Timer0_TimeIsOut(&time1,1000))
+  {
+   TimeCalc();
+  }				
+}
 		
-		//in progress 
-		if(InProgressFlag == 1)
-		{			
-			if(Timer0_TimeIsOut(&time1,1000))
-			{
-				TimeCalc();
-			}				
-		}
+//segment switching
+if(Timer0_TimeIsOut(&time2,3))
+{
+  Timer0_StartTimer(&time2);	
+  DinamicInd();
+}
 		
-		//segment switching
-		if(Timer0_TimeIsOut(&time2,3))
-		{
-			Timer0_StartTimer(&time2);	
-			DinamicInd();
-		}
-		
-		BuzzerSound();
+BuzzerSound();
 
     }
 }
@@ -175,22 +175,22 @@ int main(void)
 //timing function
 void TimeCalc(void)
 {
-		TimeToCalc = TimeToCalc - 1;
-		SimForInd[2] =TimeToCalc/60; // min
-		SimForInd[1] =(TimeToCalc%60)/10; //0.1 min;
-		SimForInd[0] =(TimeToCalc%60)%10; // sec
+TimeToCalc = TimeToCalc - 1;
+SimForInd[2] =TimeToCalc/60; // min
+SimForInd[1] =(TimeToCalc%60)/10; //0.1 min;
+SimForInd[0] =(TimeToCalc%60)%10; // sec
 		
-		//timer restart
-		if(TimeToCalc == 0)
-		{
-			switch (Mode)
-			{
-				case 1: { TimeToCalc = Inittime1;  break;}
-				case 2: { TimeToCalc = Inittime2;  break;}
-				case 3: { TimeToCalc = Inittime3;  break;}
-			}
-		}
-		Timer0_StartTimer(&time1);
+//timer restart
+if(TimeToCalc == 0)
+{
+	switch (Mode)
+	{
+	case 1: { TimeToCalc = Inittime1;  break;}
+	case 2: { TimeToCalc = Inittime2;  break;}
+	case 3: { TimeToCalc = Inittime3;  break;}
+	}
+}
+Timer0_StartTimer(&time1);
 }
 
 //mode selection function
